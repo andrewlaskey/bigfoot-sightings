@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Many many many Points with D3 and leaflet</title>
-    <meta charset="utf-8" />
+    <title>Bigfoot Sightings</title>
+    <meta charset="utf-8"/>
 
     <style>
       body {
@@ -42,10 +42,7 @@
         width: 100%;
       }
     </style>
-    <link
-      rel="stylesheet"
-      href="https://d19vzq90twjlae.cloudfront.net/leaflet-0.7.2/leaflet.css"
-    />
+    <link href="https://d19vzq90twjlae.cloudfront.net/leaflet-0.7.2/leaflet.css" rel="stylesheet"/>
   </head>
   <body>
     <div class="page">
@@ -57,20 +54,13 @@
           height="100px"
         ></svg>
       </div> -->
-      <input
-        id="year"
-        type="range"
-        min="1920"
-        max="2020"
-        step="5"
-        value="1985"
-      />
+      <input id="year" max="2020" min="1920" step="5" type="range" value="1985"/>
       <div id="yearOutput"></div>
     </div>
 
     <script src="https://d19vzq90twjlae.cloudfront.net/leaflet-0.7.2/leaflet.js"></script>
 
-    <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script charset="utf-8" src="https://d3js.org/d3.v3.min.js"></script>
 
     <script>
       const yearInput = document.getElementById('year')
@@ -344,5 +334,7 @@
         })
       })
     </script>
+  </body>
+</html> 
   </body>
 </html>
