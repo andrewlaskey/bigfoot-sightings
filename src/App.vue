@@ -1,17 +1,20 @@
 <template>
   <div id="app">
     <map-view :records="records" />
+    <year-slider />
   </div>
 </template>
 
 <script>
 import { csv } from 'd3-fetch'
 import MapView from './components/MapView.vue'
+import YearSlider from './components/YearSlider.vue'
 
 export default {
   name: 'App',
   components: {
     MapView,
+    YearSlider,
   },
   data() {
     return {

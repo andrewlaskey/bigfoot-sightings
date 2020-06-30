@@ -36,8 +36,8 @@ export default {
           [this.width, this.height],
         ])
         .radius(10),
-      width: 960,
-      height: 600,
+      width: 975,
+      height: 610,
     }
   },
   computed: {
@@ -100,12 +100,7 @@ export default {
   mounted() {
     const svg = d3.select('#map')
     const topo = topojson.mesh(statesJson, statesJson.objects.states)
-
-    // const projection = d3
-    //   .geoAlbersUsa()
-    //   .transform([this.width / 2, this.height / 2])
     const path = d3.geoPath()
-    //.projection(projection)
 
     svg
       .append('path')
@@ -115,14 +110,6 @@ export default {
       .attr('stroke-width', 0.5)
       .attr('stroke-linejoin', 'round')
       .attr('d', path)
-
-    // svg
-    //   .append('g')
-    //   .selectAll('path')
-    //   .data(this.hexbinData)
-    //   .join('path')
-    //   .attr('transform', (d) => `translate(${d.x},${d.y})`)
-    //   .attr('d', this.hexbin.hexagon())
   },
   methods: {
     color(size) {
@@ -139,4 +126,8 @@ export default {
 }
 </script>
 
-<style></style>
+<style>
+#map {
+  transform: scale(0.8);
+}
+</style>
