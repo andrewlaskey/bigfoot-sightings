@@ -27,7 +27,6 @@ import * as topojson from 'topojson-client'
 import * as d3Hexbin from 'd3-hexbin'
 import * as d3GeoProjection from 'd3-geo-projection'
 import { mapGetters } from 'vuex'
-// import statesJson from '../assets/states-albers-10m.json'
 import worldJson from '../assets/world-110m.json'
 
 export default {
@@ -39,7 +38,7 @@ export default {
           [0, 0],
           [this.width, this.height],
         ])
-        .radius(6),
+        .radius(4),
       width: 975,
       height: 610,
     }
@@ -114,20 +113,11 @@ export default {
     },
   },
   mounted() {
-    // const svg = d3.select('#map')
     const world = d3.select('#world')
     const land = topojson.feature(worldJson, worldJson.objects.land)
     const path = d3.geoPath().projection(this.projection)
 
     world.datum(land).attr('d', path)
-    // svg
-    //   .append('path')
-    //   .datum(land)
-    //   .attr('fill', '#ccc')
-    //   .attr('stroke', '#ccc')
-    //   .attr('stroke-width', 0.5)
-    //   .attr('stroke-linejoin', 'round')
-    //   .attr('d', path)
   },
   methods: {
     color(size) {
