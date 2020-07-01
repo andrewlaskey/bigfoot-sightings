@@ -2,6 +2,7 @@
   <div id="app">
     <map-view />
     <year-slider />
+    <month-slider />
   </div>
 </template>
 
@@ -9,12 +10,14 @@
 import { mapActions } from 'vuex'
 import MapView from './components/MapView.vue'
 import YearSlider from './components/YearSlider.vue'
+import MonthSlider from './components/MonthSlider.vue'
 
 export default {
   name: 'App',
   components: {
     MapView,
     YearSlider,
+    MonthSlider,
   },
   created() {
     this.loadRecords()

@@ -1,6 +1,13 @@
 <template>
   <div>
     <svg id="map" :width="width" :height="height">
+      <path
+        id="world"
+        fill="#eee"
+        stroke="#333"
+        stroke-width="0.5"
+        stroke-linejoin="round"
+      />
       <g>
         <path
           v-for="(d, index) in hexbinData"
@@ -18,8 +25,10 @@
 import * as d3 from 'd3'
 import * as topojson from 'topojson-client'
 import * as d3Hexbin from 'd3-hexbin'
+import * as d3GeoProjection from 'd3-geo-projection'
 import { mapGetters } from 'vuex'
-import statesJson from '../assets/states-albers-10m.json'
+// import statesJson from '../assets/states-albers-10m.json'
+import worldJson from '../assets/world-110m.json'
 
 export default {
   data() {
@@ -30,7 +39,7 @@ export default {
           [0, 0],
           [this.width, this.height],
         ])
-        .radius(10),
+        .radius(6),
       width: 975,
       height: 610,
     }
@@ -38,14 +47,19 @@ export default {
   computed: {
     ...mapGetters('records', ['filteredRecords']),
     projection() {
+      const p0 = [-155, 55]
+      const p1 = [-35, 55]
+      const p2 = [-92.5, 10]
+
       if (this.width && this.height) {
-        return d3
-          .geoAlbersUsa()
-          .scale(1300)
+        return d3GeoProjection
+          .geoChamberlin(p0, p1, p2)
+          .scale(600)
           .translate([this.width / 2, this.height / 2])
+          .precision(0.1)
       }
 
-      return d3.geoAlbersUsa()
+      return d3.geoChamberlin(p0, p1, p2).scale(350)
     },
     geoData() {
       if (
@@ -100,18 +114,20 @@ export default {
     },
   },
   mounted() {
-    const svg = d3.select('#map')
-    const topo = topojson.mesh(statesJson, statesJson.objects.states)
-    const path = d3.geoPath()
+    // const svg = d3.select('#map')
+    const world = d3.select('#world')
+    const land = topojson.feature(worldJson, worldJson.objects.land)
+    const path = d3.geoPath().projection(this.projection)
 
-    svg
-      .append('path')
-      .datum(topo)
-      .attr('fill', 'none')
-      .attr('stroke', '#777')
-      .attr('stroke-width', 0.5)
-      .attr('stroke-linejoin', 'round')
-      .attr('d', path)
+    world.datum(land).attr('d', path)
+    // svg
+    //   .append('path')
+    //   .datum(land)
+    //   .attr('fill', '#ccc')
+    //   .attr('stroke', '#ccc')
+    //   .attr('stroke-width', 0.5)
+    //   .attr('stroke-linejoin', 'round')
+    //   .attr('d', path)
   },
   methods: {
     color(size) {

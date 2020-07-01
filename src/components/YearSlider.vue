@@ -1,7 +1,7 @@
 <template>
   <div>
     <label>
-      <input id="filter-year" type="checkbox" @change="toggleYearFilter" />
+      <input id="filter-year" type="checkbox" @change="toggleFilter" />
       Filter by year
     </label>
     <input
@@ -37,7 +37,7 @@ export default {
       'setYearMax',
     ]),
     toggleFilter() {
-      this.toggleFilter()
+      this.toggleYearFilter()
 
       if (this.filterYear) {
         this.updateMinMax()

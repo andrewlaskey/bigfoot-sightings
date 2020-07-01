@@ -7,23 +7,41 @@ const validYear = function (datetime, min, max) {
   return year >= min && year <= max
 }
 
+const validMonth = function (datetime, min, max) {
+  const incidentDate = new Date(datetime)
+  const month = incidentDate.getMonth() + 1
+
+  return month >= min && month <= max
+}
+
 
 const state = () => ({
   records: [],
   filterYear: false,
   yearMin: 0,
-  yearMax: 2050
+  yearMax: 2050,
+  filterMonth: false,
+  monthMin: 0,
+  monthMax: 11
 })
 
 const getters = {
   filteredRecords(state) {
+    let filtered = state.records
+
     if (state.filterYear) {
-      return state.records.filter(record => {
+      filtered = filtered.filter(record => {
         return validYear(record.timestamp, state.yearMin, state.yearMax)
       })
     }
 
-    return state.records
+    if (state.filterMonth) {
+      filtered = filtered.filter(record => {
+        return validMonth(record.timestamp, state.monthMin, state.monthMax)
+      })
+    }
+
+    return filtered
   }
 }
 
@@ -50,6 +68,26 @@ const mutations = {
 
   setYearMax(state, year) {
     state.yearMax = parseInt(year, 10)
+  },
+
+  toggleMonthFilter(state) {
+    state.filterMonth = !state.filterMonth
+  },
+
+  enableMonthFilter(state) {
+    state.filterMonth = true
+  },
+
+  disableMonthFilter(state) {
+    state.filterMonth = false
+  },
+
+  setMonthMin(state, month) {
+    state.monthMin = parseInt(month, 10)
+  },
+
+  setMonthMax(state, month) {
+    state.monthMax = parseInt(month, 10)
   }
 }
 
