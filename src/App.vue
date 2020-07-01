@@ -1,12 +1,12 @@
 <template>
   <div id="app">
-    <map-view :records="records" />
+    <map-view />
     <year-slider />
   </div>
 </template>
 
 <script>
-import { csv } from 'd3-fetch'
+import { mapActions } from 'vuex'
 import MapView from './components/MapView.vue'
 import YearSlider from './components/YearSlider.vue'
 
@@ -16,15 +16,11 @@ export default {
     MapView,
     YearSlider,
   },
-  data() {
-    return {
-      records: [],
-    }
-  },
   created() {
-    csv('./bfro_report_locations.csv').then((data) => {
-      this.records = data
-    })
+    this.loadRecords()
+  },
+  methods: {
+    ...mapActions('records', ['loadRecords']),
   },
 }
 </script>

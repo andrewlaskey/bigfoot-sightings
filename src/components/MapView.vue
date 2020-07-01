@@ -18,15 +18,10 @@
 import * as d3 from 'd3'
 import * as topojson from 'topojson-client'
 import * as d3Hexbin from 'd3-hexbin'
+import { mapGetters } from 'vuex'
 import statesJson from '../assets/states-albers-10m.json'
 
 export default {
-  props: {
-    records: {
-      type: Array,
-      default: () => [],
-    },
-  },
   data() {
     return {
       hexbin: d3Hexbin
@@ -41,6 +36,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters('records', ['filteredRecords']),
     projection() {
       if (this.width && this.height) {
         return d3
@@ -52,8 +48,11 @@ export default {
       return d3.geoAlbersUsa()
     },
     geoData() {
-      if (Array.isArray(this.records) && this.records.length > 0) {
-        return this.records.map((record) => {
+      if (
+        Array.isArray(this.filteredRecords) &&
+        this.filteredRecords.length > 0
+      ) {
+        return this.filteredRecords.map((record) => {
           return {
             id: record.number,
             type: 'Feature',
@@ -72,8 +71,11 @@ export default {
       return []
     },
     projectionData() {
-      if (Array.isArray(this.records) && this.records.length > 0) {
-        return this.records.reduce((points, record) => {
+      if (
+        Array.isArray(this.filteredRecords) &&
+        this.filteredRecords.length > 0
+      ) {
+        return this.filteredRecords.reduce((points, record) => {
           const newPoint = this.projection([
             +record.longitude,
             +record.latitude,
