@@ -2,7 +2,6 @@
   <div id="app">
     <map-view />
     <year-chart />
-    <year-slider />
     <month-chart />
     <month-slider />
   </div>
@@ -12,7 +11,6 @@
 import { mapActions } from 'vuex'
 import MapView from './components/MapView.vue'
 import YearChart from './components/YearChart.vue'
-import YearSlider from './components/YearSlider.vue'
 import MonthSlider from './components/MonthSlider.vue'
 import MonthChart from './components/MonthChart.vue'
 
@@ -21,7 +19,6 @@ export default {
   components: {
     MapView,
     YearChart,
-    YearSlider,
     MonthSlider,
     MonthChart,
   },

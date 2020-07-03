@@ -11,16 +11,18 @@
           :width="xScale.bandwidth()"
         />
       </g>
+      <g ref="brush" class="brush" />
       <g ref="xAxis" :transform="`translate(0,${height - margin.bottom})`" />
       <g ref="yAxis" :transform="`translate(${margin.left},0)`" />
     </svg>
+    <p>{{ yearMin }} - {{ yearMax }}</p>
   </div>
 </template>
 
 <script>
 import * as d3 from 'd3'
 import * as d3Axis from 'd3-axis'
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 export default {
   data() {
@@ -31,7 +33,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('records', ['records']),
+    ...mapState('records', ['records', 'yearMin', 'yearMax']),
     bundled() {
       if (this.records.length > 0) {
         const parseTime = d3.timeParse('%Y-%m-%d')
@@ -78,11 +80,19 @@ export default {
         .domain([new Date(1920, 0, 1), new Date(2020, 11, 1)])
         .range([this.margin.left, this.width - this.margin.right])
     },
+    brushX() {
+      return d3
+        .brushX()
+        .extent([
+          [this.margin.left, this.margin.top],
+          [this.width - this.margin.right, this.height - this.margin.bottom],
+        ])
+        .on('end', this.brushed)
+    },
   },
   watch: {
     bundled() {
       if (this.bundled.length > 0) {
-        console.log(this.xAxisScale.domain())
         const xAxis = d3.select(this.$refs.xAxis)
         xAxis.call(
           d3Axis
@@ -96,9 +106,42 @@ export default {
       }
     },
   },
+  mounted() {
+    const brush = d3.select(this.$refs.brush)
+    brush.call(this.brushX)
+  },
   methods: {
+    ...mapMutations('records', [
+      'disableYearFilter',
+      'enableYearFilter',
+      'setYearMin',
+      'setYearMax',
+    ]),
     barHeight(value) {
       return this.yScale(0) - this.yScale(value)
+    },
+    brushed() {
+      if (!d3.event.sourceEvent) return
+
+      const selection = d3.event.selection
+      const interval = d3.timeYear.every(1)
+
+      if (!selection) {
+        this.disableYearFilter()
+        return
+      }
+
+      const [x0, x1] = selection.map((d) =>
+        interval.round(this.xAxisScale.invert(d))
+      )
+      const brush = d3.select(this.$refs.brush)
+      brush
+        .transition()
+        .call(this.brushX.move, x1 > x0 ? [x0, x1].map(this.xAxisScale) : null)
+
+      this.enableYearFilter()
+      this.setYearMin(x0.getFullYear())
+      this.setYearMax(x1.getFullYear())
     },
   },
 }
