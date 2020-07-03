@@ -1,7 +1,16 @@
 <template>
   <div>
     <svg id="month-chart" :width="width" :height="height">
-      <g id="month-data" fill="#69b3a2" />
+      <g id="month-data" fill="#69b3a2">
+        <rect
+          v-for="d in bundled"
+          :key="d.month"
+          :x="xScale(d.month)"
+          :y="yScale(d.value)"
+          :height="barHeight(d.value)"
+          :width="xScale.bandwidth()"
+        />
+      </g>
     </svg>
   </div>
 </template>
@@ -42,34 +51,24 @@ export default {
 
       return []
     },
+    xScale() {
+      return d3
+        .scaleBand()
+        .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+        .range([this.margin.left, this.width - this.margin.right])
+        .padding(0.1)
+    },
+    yScale() {
+      return d3
+        .scaleLinear()
+        .domain([0, d3.max(this.bundled, (d) => d.value)])
+        .nice()
+        .range([this.height - this.margin.bottom, this.margin.top])
+    },
   },
-  watch: {
-    bundled() {
-      if (this.bundled.length > 0) {
-        const svg = d3.select('#month-data')
-        const x = d3
-          .scaleBand()
-          .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
-          .range([this.margin.left, this.width - this.margin.right])
-        const y = d3
-          .scaleLinear()
-          .domain([0, d3.max(this.bundled, (d) => d.value)])
-          .nice()
-          .range([this.height - this.margin.bottom, this.margin.top])
-
-        svg
-          .selectAll('rect')
-          .data(this.bundled)
-          .join('rect')
-          .attr('x', (d) => {
-            const result = x(d.month)
-            console.log(result)
-            return result
-          })
-          .attr('y', (d) => y(d.value))
-          .attr('height', (d) => y(0) - y(d.value))
-          .attr('width', x.bandwidth())
-      }
+  methods: {
+    barHeight(value) {
+      return this.yScale(0) - this.yScale(value)
     },
   },
 }

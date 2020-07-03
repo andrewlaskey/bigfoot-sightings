@@ -1,7 +1,16 @@
 <template>
   <div>
     <svg id="year-chart" :width="width" :height="height">
-      <g id="year-data" fill="#69b3a2" />
+      <g id="year-data" fill="#69b3a2">
+        <rect
+          v-for="d in bundled"
+          :key="d.date"
+          :x="xScale(d.date)"
+          :y="yScale(d.value)"
+          :height="barHeight(d.value)"
+          :width="xScale.bandwidth()"
+        />
+      </g>
     </svg>
   </div>
 </template>
@@ -46,30 +55,24 @@ export default {
 
       return []
     },
+    xScale() {
+      return d3
+        .scaleBand()
+        .domain(d3.timeYears(new Date(1920, 0, 1), new Date(2020, 11, 1)))
+        .range([this.margin.left, this.width - this.margin.right])
+        .padding(0.1)
+    },
+    yScale() {
+      return d3
+        .scaleLinear()
+        .domain([0, d3.max(this.bundled, (d) => d.value)])
+        .nice()
+        .range([this.height - this.margin.bottom, this.margin.top])
+    },
   },
-  watch: {
-    bundled() {
-      if (this.bundled.length > 0) {
-        const svg = d3.select('#year-data')
-        const x = d3
-          .scaleBand()
-          .domain(d3.timeYears(new Date(1920, 0, 1), new Date(2020, 11, 1)))
-          .range([this.margin.left, this.width - this.margin.right])
-        const y = d3
-          .scaleLinear()
-          .domain([0, d3.max(this.bundled, (d) => d.value)])
-          .nice()
-          .range([this.height - this.margin.bottom, this.margin.top])
-
-        svg
-          .selectAll('rect')
-          .data(this.bundled)
-          .join('rect')
-          .attr('x', (d) => x(d.date))
-          .attr('y', (d) => y(d.value))
-          .attr('height', (d) => y(0) - y(d.value))
-          .attr('width', x.bandwidth())
-      }
+  methods: {
+    barHeight(value) {
+      return this.yScale(0) - this.yScale(value)
     },
   },
 }
