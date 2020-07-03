@@ -1,9 +1,9 @@
 <template>
   <div id="app">
+    <h1>Bigfoot Sightings</h1>
     <map-view />
     <year-chart />
     <month-chart />
-    <month-slider />
   </div>
 </template>
 
@@ -11,7 +11,6 @@
 import { mapActions } from 'vuex'
 import MapView from './components/MapView.vue'
 import YearChart from './components/YearChart.vue'
-import MonthSlider from './components/MonthSlider.vue'
 import MonthChart from './components/MonthChart.vue'
 
 export default {
@@ -19,7 +18,6 @@ export default {
   components: {
     MapView,
     YearChart,
-    MonthSlider,
     MonthChart,
   },
   created() {

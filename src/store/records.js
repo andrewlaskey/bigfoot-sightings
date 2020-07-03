@@ -18,8 +18,8 @@ const validMonth = function (datetime, min, max) {
 const state = () => ({
   records: [],
   filterYear: false,
-  yearMin: 1850,
-  yearMax: 2050,
+  yearMin: 1920,
+  yearMax: 2020,
   filterMonth: false,
   monthMin: 0,
   monthMax: 11

@@ -11,16 +11,18 @@
           :width="xScale.bandwidth()"
         />
       </g>
+      <g ref="brush" class="brush" />
       <g ref="xAxis" :transform="`translate(0,${height - margin.bottom})`" />
       <g ref="yAxis" :transform="`translate(${margin.left},0)`" />
     </svg>
+    <p>{{ getFullMonth(monthMin) }} - {{ getFullMonth(monthMax) }}</p>
   </div>
 </template>
 
 <script>
 import * as d3 from 'd3'
 import * as d3Axis from 'd3-axis'
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 
 export default {
   data() {
@@ -31,7 +33,7 @@ export default {
     }
   },
   computed: {
-    ...mapState('records', ['records']),
+    ...mapState('records', ['records', 'monthMin', 'monthMax']),
     bundled() {
       if (this.records.length > 0) {
         return d3
@@ -54,6 +56,22 @@ export default {
 
       return []
     },
+    monthStrings() {
+      return [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ]
+    },
     xScale() {
       return d3
         .scaleBand()
@@ -64,20 +82,7 @@ export default {
     xAxisScale() {
       return d3
         .scaleBand()
-        .domain([
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ])
+        .domain(this.monthStrings)
         .range([this.margin.left, this.width - this.margin.right])
         .padding(0.1)
     },
@@ -87,6 +92,15 @@ export default {
         .domain([0, d3.max(this.bundled, (d) => d.value)])
         .nice()
         .range([this.height - this.margin.bottom, this.margin.top])
+    },
+    brushX() {
+      return d3
+        .brushX()
+        .extent([
+          [this.margin.left, this.margin.top],
+          [this.width - this.margin.right, this.height - this.margin.bottom],
+        ])
+        .on('end', this.brushed)
     },
   },
   watch: {
@@ -100,9 +114,56 @@ export default {
       }
     },
   },
+  mounted() {
+    const brush = d3.select(this.$refs.brush)
+    brush.call(this.brushX)
+  },
   methods: {
+    ...mapMutations('records', [
+      'disableMonthFilter',
+      'enableMonthFilter',
+      'setMonthMin',
+      'setMonthMax',
+    ]),
+    getFullMonth(value) {
+      const date = new Date(2000, value, 1)
+
+      return d3.timeFormat('%B')(date)
+    },
     barHeight(value) {
       return this.yScale(0) - this.yScale(value)
+    },
+    brushed() {
+      if (!d3.event.sourceEvent) return
+
+      const selection = d3.event.selection
+
+      if (!selection) {
+        this.disableMonthFilter()
+        return
+      }
+
+      const domain = this.xScale.domain()
+      const range = this.xScale.range()
+      const invert = d3
+        .scaleQuantize()
+        .domain(range)
+        .range(domain)
+
+      const [x0, x1] = selection.map((d) => invert(d))
+      const newX0 = this.xScale(x0)
+      const newX1 =
+        this.xScale(x1) + this.xScale.bandwidth() + this.xScale.padding()
+
+      const brush = d3.select(this.$refs.brush)
+
+      brush
+        .transition()
+        .call(this.brushX.move, newX1 > newX0 ? [newX0, newX1] : null)
+
+      this.enableMonthFilter()
+      this.setMonthMin(x0)
+      this.setMonthMax(x1)
     },
   },
 }
