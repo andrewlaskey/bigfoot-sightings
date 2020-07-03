@@ -13,9 +13,7 @@
       v-model="selectedYear"
       @input="updateMinMax"
     />
-    <div id="yearOutput">
-      {{ selectedYear }}
-    </div>
+    <div id="yearOutput">{{ selectedYear }} - {{ selectedYear + 5 }}</div>
   </div>
 </template>
 

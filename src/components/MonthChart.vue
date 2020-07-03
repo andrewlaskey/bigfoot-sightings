@@ -1,7 +1,7 @@
 <template>
   <div>
     <svg id="month-chart" :width="width" :height="height">
-      <g id="month-data" fill="#69b3a2">
+      <g fill="#69b3a2">
         <rect
           v-for="d in bundled"
           :key="d.month"
@@ -11,12 +11,15 @@
           :width="xScale.bandwidth()"
         />
       </g>
+      <g ref="xAxis" :transform="`translate(0,${height - margin.bottom})`" />
+      <g ref="yAxis" :transform="`translate(${margin.left},0)`" />
     </svg>
   </div>
 </template>
 
 <script>
 import * as d3 from 'd3'
+import * as d3Axis from 'd3-axis'
 import { mapState } from 'vuex'
 
 export default {
@@ -58,12 +61,43 @@ export default {
         .range([this.margin.left, this.width - this.margin.right])
         .padding(0.1)
     },
+    xAxisScale() {
+      return d3
+        .scaleBand()
+        .domain([
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ])
+        .range([this.margin.left, this.width - this.margin.right])
+        .padding(0.1)
+    },
     yScale() {
       return d3
         .scaleLinear()
         .domain([0, d3.max(this.bundled, (d) => d.value)])
         .nice()
         .range([this.height - this.margin.bottom, this.margin.top])
+    },
+  },
+  watch: {
+    bundled() {
+      if (this.bundled.length > 0) {
+        const xAxis = d3.select(this.$refs.xAxis)
+        xAxis.call(d3Axis.axisBottom(this.xAxisScale))
+
+        const yAxis = d3.select(this.$refs.yAxis)
+        yAxis.call(d3Axis.axisLeft(this.yScale).ticks(5))
+      }
     },
   },
   methods: {

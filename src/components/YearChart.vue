@@ -3,20 +3,23 @@
     <svg id="year-chart" :width="width" :height="height">
       <g id="year-data" fill="#69b3a2">
         <rect
-          v-for="d in bundled"
-          :key="d.date"
+          v-for="(d, i) in bundled"
+          :key="i"
           :x="xScale(d.date)"
           :y="yScale(d.value)"
           :height="barHeight(d.value)"
           :width="xScale.bandwidth()"
         />
       </g>
+      <g ref="xAxis" :transform="`translate(0,${height - margin.bottom})`" />
+      <g ref="yAxis" :transform="`translate(${margin.left},0)`" />
     </svg>
   </div>
 </template>
 
 <script>
 import * as d3 from 'd3'
+import * as d3Axis from 'd3-axis'
 import { mapState } from 'vuex'
 
 export default {
@@ -68,6 +71,29 @@ export default {
         .domain([0, d3.max(this.bundled, (d) => d.value)])
         .nice()
         .range([this.height - this.margin.bottom, this.margin.top])
+    },
+    xAxisScale() {
+      return d3
+        .scaleTime()
+        .domain([new Date(1920, 0, 1), new Date(2020, 11, 1)])
+        .range([this.margin.left, this.width - this.margin.right])
+    },
+  },
+  watch: {
+    bundled() {
+      if (this.bundled.length > 0) {
+        console.log(this.xAxisScale.domain())
+        const xAxis = d3.select(this.$refs.xAxis)
+        xAxis.call(
+          d3Axis
+            .axisBottom(this.xAxisScale)
+            .ticks(d3.timeYear.every(5))
+            .tickFormat(d3.timeFormat('%Y'))
+        )
+
+        const yAxis = d3.select(this.$refs.yAxis)
+        yAxis.call(d3Axis.axisLeft(this.yScale).ticks(5))
+      }
     },
   },
   methods: {
