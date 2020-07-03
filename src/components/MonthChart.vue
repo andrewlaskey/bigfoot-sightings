@@ -1,7 +1,7 @@
 <template>
   <div>
     <svg id="month-chart" :width="width" :height="height">
-      <path id="month-data" fill="#69b3a2" />
+      <g id="month-data" fill="#69b3a2" />
     </svg>
   </div>
 </template>
@@ -22,23 +22,19 @@ export default {
     ...mapState('records', ['records']),
     bundled() {
       if (this.records.length > 0) {
-        const parseTime = d3.timeParse('%Y-%m-%d')
-
         return d3
           .nest()
           .key((d) => {
             const date = new Date(d.timestamp)
-            // const year = date.getFullYear()
-            const month = date.getMonth()
 
-            return new Date(1, month, 1).toISOString().split('T')[0]
+            return date.getMonth()
           })
           .sortKeys(d3.ascending)
           .rollup((v) => v.length)
           .entries(this.records)
           .map((entry) => {
             return {
-              date: parseTime(entry.key),
+              month: parseInt(entry.key, 10),
               value: entry.value,
             }
           })
@@ -52,23 +48,27 @@ export default {
       if (this.bundled.length > 0) {
         const svg = d3.select('#month-data')
         const x = d3
-          .scaleTime()
-          .domain(d3.extent(this.bundled, (d) => d.date))
+          .scaleBand()
+          .domain([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
           .range([this.margin.left, this.width - this.margin.right])
         const y = d3
           .scaleLinear()
           .domain([0, d3.max(this.bundled, (d) => d.value)])
           .nice()
           .range([this.height - this.margin.bottom, this.margin.top])
-        const curve = d3.curveLinear
-        const area = d3
-          .area()
-          .curve(curve)
-          .x((d) => x(d.date))
-          .y0(y(0))
-          .y1((d) => y(d.value))
 
-        svg.datum(this.bundled).attr('d', area)
+        svg
+          .selectAll('rect')
+          .data(this.bundled)
+          .join('rect')
+          .attr('x', (d) => {
+            const result = x(d.month)
+            console.log(result)
+            return result
+          })
+          .attr('y', (d) => y(d.value))
+          .attr('height', (d) => y(0) - y(d.value))
+          .attr('width', x.bandwidth())
       }
     },
   },

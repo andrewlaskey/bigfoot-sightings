@@ -1,7 +1,7 @@
 <template>
   <div>
     <svg id="year-chart" :width="width" :height="height">
-      <path id="year-data" fill="#69b3a2" />
+      <g id="year-data" fill="#69b3a2" />
     </svg>
   </div>
 </template>
@@ -31,7 +31,7 @@ export default {
             const year = date.getFullYear()
             // const month = date.getMonth()
 
-            return new Date(year, 1, 1).toISOString().split('T')[0]
+            return new Date(year, 0, 1).toISOString().split('T')[0]
           })
           .sortKeys(d3.ascending)
           .rollup((v) => v.length)
@@ -52,23 +52,23 @@ export default {
       if (this.bundled.length > 0) {
         const svg = d3.select('#year-data')
         const x = d3
-          .scaleTime()
-          .domain(d3.extent(this.bundled, (d) => d.date))
+          .scaleBand()
+          .domain(d3.timeYears(new Date(1920, 0, 1), new Date(2020, 11, 1)))
           .range([this.margin.left, this.width - this.margin.right])
         const y = d3
           .scaleLinear()
           .domain([0, d3.max(this.bundled, (d) => d.value)])
           .nice()
           .range([this.height - this.margin.bottom, this.margin.top])
-        const curve = d3.curveLinear
-        const area = d3
-          .area()
-          .curve(curve)
-          .x((d) => x(d.date))
-          .y0(y(0))
-          .y1((d) => y(d.value))
 
-        svg.datum(this.bundled).attr('d', area)
+        svg
+          .selectAll('rect')
+          .data(this.bundled)
+          .join('rect')
+          .attr('x', (d) => x(d.date))
+          .attr('y', (d) => y(d.value))
+          .attr('height', (d) => y(0) - y(d.value))
+          .attr('width', x.bandwidth())
       }
     },
   },

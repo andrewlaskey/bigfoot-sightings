@@ -3,8 +3,8 @@
     <map-view />
     <year-chart />
     <year-slider />
-    <month-slider />
     <month-chart />
+    <month-slider />
   </div>
 </template>
 
